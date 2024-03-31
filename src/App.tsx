@@ -1,24 +1,53 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useEffect, useState } from 'react';
 import './App.css';
+import { BoardComponent } from './components/BoardComponent';
+import { Board } from './models/Board';
+import { Player } from './models/Player';
+import { Colors } from './models/Colors';
+import { LostFiguresComponent } from './components/LostFiguresComponent';
+import { TimerComponent } from './components/TimerComponent';
 
 function App() {
+  const [board, setBoard] = useState(new Board());
+  const [whitePlayer, setWhitePlayet] = useState<Player>(new Player(Colors.WHITE));
+  const [blackPlayer, setBlackPlayer] = useState<Player>(new Player(Colors.BLACK));
+  const [curPlayer, setCurPlayer] = useState<Player | null>(null);
+
+  useEffect(() => {
+    restart();
+  }, [])
+
+  function restart() {
+    const newBoard = new Board();
+    newBoard.initCells();
+    newBoard.addFigures();
+    setBoard(newBoard);
+    setCurPlayer(whitePlayer);
+  };
+
+  const swapPlayer = () => {
+    setCurPlayer(curPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='app'>
+      <TimerComponent restart={restart} currentPlayer={curPlayer}/>
+      <BoardComponent 
+        board={board} 
+        setBoard={setBoard}
+        curPlayer={curPlayer}
+        swapPlayer={swapPlayer}
+      />
+      <div>
+        <LostFiguresComponent 
+          title='Черные'
+          figures={board.lostBlackFigures}
+        />
+        <LostFiguresComponent 
+          title='Белые'
+          figures={board.lostWhiteFigures}
+        />
+      </div>
     </div>
   );
 }
